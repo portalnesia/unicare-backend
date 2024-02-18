@@ -4,10 +4,10 @@
  * Proprietary and confidential
  * Written by Putu Aditya <aditya@portalnesia.com>
  */
-package cmd
+
+package main
 
 import (
-	"flag"
 	"unicare/internal/config"
 )
 
@@ -15,19 +15,9 @@ var (
 	app *config.App
 )
 
-// Start
-//
-//	@Description: Start server
-//	@param cfg
-func Start(cfg config.Config) {
-	app = config.New(cfg)
+func init() {
+	app = config.New(config.Config{})
+}
+func main() {
 
-	migration := flag.Bool("migration", false, "Database Migration")
-	flag.Parse()
-
-	if *migration {
-		startMgration()
-	} else {
-		startServer()
-	}
 }

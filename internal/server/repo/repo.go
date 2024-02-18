@@ -5,14 +5,14 @@
  * Written by Putu Aditya <aditya@portalnesia.com>
  */
 
-package model
+package repo
 
-import "go.portalnesia.com/nullable"
+import "unicare/internal/config"
 
-type Context struct {
-	User     nullable.Type[User]
-	Customer nullable.Type[Customer]
+type Repo struct {
+	app *config.App
+}
 
-	IP     string
-	Method string
+func New(app *config.App) *Repo {
+	return &Repo{app}
 }

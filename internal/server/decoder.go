@@ -10,6 +10,8 @@ package server
 import (
 	"github.com/gofiber/fiber/v2"
 	"go.portalnesia.com/nullable"
+	"reflect"
+	"unicare/internal/model"
 )
 
 func registerDecoder() []fiber.ParserType {
@@ -40,6 +42,11 @@ func registerDecoder() []fiber.ParserType {
 		Converter:  nullable.StringArray{}.FiberConverter,
 	}
 
+	rolesType := fiber.ParserType{
+		Customtype: model.Roles(0),
+		Converter:  RoleDecoder,
+	}
+
 	return []fiber.ParserType{
 		nullBool,
 		nullTime,
@@ -48,5 +55,14 @@ func registerDecoder() []fiber.ParserType {
 		nullInt,
 		nullInt,
 		nullStringArray,
+		rolesType,
 	}
+}
+
+func RoleDecoder(s string) reflect.Value {
+	var d model.Roles
+	if r, ok := model.StringToRoles[s]; ok {
+		d = r
+	}
+	return reflect.ValueOf(d)
 }

@@ -13,27 +13,24 @@ import (
 	"unicare/internal/model"
 )
 
-func (u *UseCase) Login(tx *gorm.DB, req entity.LoginRequest) (model.Session, error) {
+func (u *UseCase) ListUsers(tx *gorm.DB, ctx *model.Context, req *entity.Pagination, role model.Roles) (any, error) {
 	if err := u.app.Validator.Struct(req); err != nil {
 		return nil, u.app.Exc.Validator(err)
 	}
 
-	if req.Roles == model.Roles_CUSTOMER {
-		user, err := u.repo.GetCustomerByNIK(tx, req.NIK)
+	if role == model.Roles_CUSTOMER {
+		users, err := u.repo.ListCustomers(tx, req)
 		if err != nil {
 			return nil, err
 		}
-		return user, nil
+
+		return users, nil
 	} else {
-		user, err := u.repo.GetUserByEmail(tx, req.Roles, req.Email)
+		users, err := u.repo.ListUsers(tx, req, role)
 		if err != nil {
 			return nil, err
 		}
 
-		if !user.CheckPassword(req.Password) {
-			return nil, u.app.Exc.InvalidParameter("password")
-		}
-
-		return user, nil
+		return users, nil
 	}
 }

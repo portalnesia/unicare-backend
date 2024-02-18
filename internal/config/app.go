@@ -8,10 +8,13 @@
 package config
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"github.com/subosito/gotenv"
 	"gorm.io/gorm"
+	"os"
 	"strings"
 	"time"
 )
@@ -27,12 +30,15 @@ type Config struct {
 }
 
 type App struct {
-	Env Env
-	DB  *gorm.DB
-	Exc Exception
+	Env       Env
+	DB        *gorm.DB
+	Exc       Exception
+	Validator *validator.Validate
 }
 
 func New(cfg Config) *App {
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
+	log.Info().Str("Build", cfg.Build).Msg("Initializing application...")
 	_ = gotenv.Load()
 
 	replacer := strings.NewReplacer(".", "_")
@@ -42,17 +48,17 @@ func New(cfg Config) *App {
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 
-	_ = viper.ReadInConfig()
+	//_ = viper.ReadInConfig()
 
 	env = Env{
 		IsProd: cfg.Build == "production",
 	}
-	zerolog.TimeFieldFormat = time.RFC3339
 
 	return &App{
-		Env: env,
-		Exc: Exception{},
-		//DB:  initDatabase(),
+		Env:       env,
+		Exc:       Exception{},
+		DB:        initDatabase(),
+		Validator: initValidate(),
 	}
 }
 

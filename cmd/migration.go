@@ -5,14 +5,15 @@
  * Written by Putu Aditya <aditya@portalnesia.com>
  */
 
-package model
+package cmd
 
-import "go.portalnesia.com/nullable"
+import (
+	"unicare/internal/model"
+)
 
-type Context struct {
-	User     nullable.Type[User]
-	Customer nullable.Type[Customer]
-
-	IP     string
-	Method string
+func startMgration() {
+	app.DB.AutoMigrate(
+		model.User{},
+		model.Customer{},
+	)
 }

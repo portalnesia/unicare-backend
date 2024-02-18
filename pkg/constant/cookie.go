@@ -5,14 +5,8 @@
  * Written by Putu Aditya <aditya@portalnesia.com>
  */
 
-package model
+package constant
 
-import "go.portalnesia.com/nullable"
-
-type Context struct {
-	User     nullable.Type[User]
-	Customer nullable.Type[Customer]
-
-	IP     string
-	Method string
-}
+const (
+	Cookie_AUTH = "_auth"
+)

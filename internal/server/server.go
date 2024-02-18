@@ -20,6 +20,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/rs/zerolog/log"
 	"unicare/internal/config"
+	"unicare/internal/server/handler"
+	"unicare/internal/server/middleware"
+	"unicare/internal/server/repo"
+	"unicare/internal/server/routes"
+	"unicare/internal/server/usecase"
 )
 
 func New(app *config.App) (fiberApp *fiber.App) {
@@ -35,7 +40,10 @@ func New(app *config.App) (fiberApp *fiber.App) {
 			err := app.Exc.Server()
 			var e *config.Error
 			if errors.As(errHandler, &e) {
-				log.Debug().Err(e.Err).Int("status", e.Status).Stack().Msg("Error")
+				if !app.Env.IsProd {
+					log.Debug().Err(e.Err).Int("status", e.Status).Stack().Msg("Error")
+				}
+
 				if e.Message == "Something went wrong" && e.Err != nil {
 					fmt.Println(e.Err)
 				}
@@ -73,14 +81,26 @@ func New(app *config.App) (fiberApp *fiber.App) {
 	// Request ID
 	fiberApp.Use(requestid.New())
 
+	r := repo.New(app)
+	u := usecase.New(app, r)
+	h := handler.New(app, u)
+
 	// middleware
+	m := middleware.New(app, r)
+	fiberApp.Use(m.Init)
+
+	// Cors
+	fiberApp.Use(m.Cors())
 
 	// idempotency
 	fiberApp.Use(idempotency.New())
 
-	fiberApp.Get("/", func(c *fiber.Ctx) error {
+	api := fiberApp.Group("/api")
+	api.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"error": false, "message": "API Uptime"})
 	})
+
+	routes.New(api, h, m)
 
 	fiberApp.Use(func(c *fiber.Ctx) error {
 		err := app.Exc.EndpointNotFound()

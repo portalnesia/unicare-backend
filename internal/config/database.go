@@ -28,11 +28,11 @@ func initDatabase() (db *gorm.DB) {
 	}
 
 	mysqlconfig := mysql2.Config{
-		User:                 viper.GetString("db.mysql.user"),
-		Passwd:               viper.GetString("db.mysql.password"),
-		DBName:               viper.GetString("db.mysql.database"),
+		User:                 viper.GetString("db.user"),
+		Passwd:               viper.GetString("db.password"),
+		DBName:               viper.GetString("db.database"),
 		Net:                  "tcp",
-		Addr:                 fmt.Sprintf("%s:%d", viper.GetString("db.mysql.host"), viper.GetInt("db.mysql.port")),
+		Addr:                 fmt.Sprintf("%s:%d", viper.GetString("db.host"), viper.GetInt("db.port")),
 		ParseTime:            true,
 		Loc:                  location,
 		AllowNativePasswords: true,
