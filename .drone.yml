@@ -16,8 +16,10 @@ steps:
       GO111MODULE: on
       GOSUMDB: off
     commands:
+      - apk update && apk add upx
       - go mod download
       - GOMAXPROCS=1 CGO_ENABLED=0 go build -ldflags "-s -w -X main.build=production" -o unicare main.go
+      - upx --brute unicare
 
   - name: transfer
     image: appleboy/drone-scp
@@ -68,9 +70,9 @@ steps:
         - failure
     settings:
       webhook_id:
-        from_secret: discord_id
+        from_secret: unicare_discord_id
       webhook_token:
-        from_secret: discord_token
+        from_secret: unicare_discord_token
       avatar_url: https://content.portalnesia.com/icon/PN-Logo.png
       username: Portalnesia
       message: |

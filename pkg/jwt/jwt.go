@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	issuer = "unicare"
+	issuer   = "northbit"
+	audience = "unicare"
 )
 
 //jwt2.StandardClaims
@@ -28,6 +29,7 @@ func GenerateJWT(subject int, dataClaims map[string]interface{}) (string, error)
 	claims := jwt2.MapClaims{
 		"iss": issuer,
 		"sub": subject,
+		"aud": audience,
 		"iat": currentTime.Unix(),
 		"jti": uuid.New().String(), // Generate a unique JWT ID using UUID v4.
 		"exp": currentTime.Add(time.Hour * 6).Unix(),
@@ -61,10 +63,12 @@ func Verify(tokenString string) (bool, jwt2.MapClaims, error) {
 
 	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt2.MapClaims); ok && token.Valid {
-		if !claims.VerifyIssuer("unicare", true) {
+		if !claims.VerifyIssuer(issuer, true) {
 			return false, nil, errors.New("invalid JWT token")
 		}
-
+		if !claims.VerifyAudience(audience, true) {
+			return false, nil, errors.New("invalid JWT token")
+		}
 		return true, claims, nil
 	}
 
