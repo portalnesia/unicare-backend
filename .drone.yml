@@ -1,0 +1,89 @@
+---
+kind: pipeline
+type: docker
+name: deployment
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+steps:
+  - name: build
+    image: golang:1.21-alpine3.19
+    environment:
+      GO111MODULE: on
+      GOSUMDB: off
+    commands:
+      - apk update && apk add upx
+      - go mod download
+      - GOMAXPROCS=1 CGO_ENABLED=0 go build -ldflags "-s -w -X main.build=production" -o unicare main.go
+      - upx --brute unicare
+
+  - name: transfer
+    image: appleboy/drone-scp
+    settings:
+      host:
+        from_secret: ssh_host
+      user:
+        from_secret: ssh_user
+      key:
+        from_secret: ssh_private_key
+      port:
+        from_secret: ssh_port
+      overwrite: true
+      target: /home/putu/portalnesia/nodejs/northbit/backend
+      source:
+        - unicare
+      depends_on:
+        - build
+
+  - name: deploy
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        from_secret: ssh_host
+      user:
+        from_secret: ssh_user
+      key:
+        from_secret: ssh_private_key
+      port:
+        from_secret: ssh_port
+      command_timeout: 5m
+      script_stop: true
+    script: |
+      cd ~/portalnesia/nodejs/northbit/backend
+      chmod 744 unicare
+      ./unicare -migration
+      pm2 reload unicare-backend
+    depends_on:
+      - transfer
+
+  - name: discord
+    image: appleboy/drone-discord
+    depends_on:
+      - deploy
+    when:
+      status:
+        - success
+        - failure
+    settings:
+      webhook_id:
+        from_secret: unicare_discord_id
+      webhook_token:
+        from_secret: unicare_discord_token
+      avatar_url: https://content.portalnesia.com/icon/PN-Logo.png
+      username: Portalnesia
+      message: |
+        {{repo.namespace}}/{{repo.name}}
+        
+        Deployment
+        {{#success build.status}}
+        Status: succeeded ✅
+        {{else}}
+        Status: failed ❌
+        See: {{build.link}}
+        {{/success}}
+        
+        by. Portalnesia CI/CD
