@@ -38,8 +38,8 @@ steps:
       target: /home/putu/portalnesia/nodejs/northbit/backend
       source:
         - unicare
-      depends_on:
-        - build-golang
+    depends_on:
+      - build-golang
 
   - name: deploy-binary
     image: appleboy/drone-ssh
