@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3c8ad382-1ce2-4d49-b099-ad9651da3adc" name="Changes" comment="first try ci/cd">
       <change beforePath="$PROJECT_DIR$/.drone.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.drone.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +40,7 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="dev" />
-                    <option name="lastUsedInstant" value="1708114075" />
+                    <option name="lastUsedInstant" value="1708344236" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
